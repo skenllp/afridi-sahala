@@ -428,76 +428,20 @@
   var addToCalendarBtn = document.getElementById('addToCalendarBtn');
   if(addToCalendarBtn){
     addToCalendarBtn.addEventListener('click', function(){
-      // 6 Dec 2026 11:00 AM IST (UTC+5:30) = 05:30 UTC
+      // 6 Dec 2026 11:00 AM IST (UTC+5:30) = 05:30 UTC to 08:30 UTC
       var startUTC = '20261206T053000Z';
       var endUTC   = '20261206T083000Z';
       var summary  = 'Afridi & Sahala \u2014 Nikkah Ceremony';
       var location = 'Vajra Convention Centre, Kannur';
-      var desc     = 'Nikkah Ceremony of Afridi Muhammed Zahid & Sahala Mumthaz\\nSunday\\, 6 December 2026 \xb7 11:00 AM IST';
+      var details  = 'Nikkah Ceremony of Afridi Muhammed Zahid & Sahala Mumthaz\nSunday, 6 December 2026 \u00B7 11:00 AM IST\nVenue: Vajra Convention Centre, Kannur';
 
-      var icsLines = [
-        'BEGIN:VCALENDAR',
-        'VERSION:2.0',
-        'PRODID:-//Afridi Sahala Wedding//EN',
-        'CALSCALE:GREGORIAN',
-        'METHOD:PUBLISH',
-        'BEGIN:VEVENT',
-        'UID:afridi-sahala-nikkah-20261206@wedding',
-        'DTSTAMP:' + startUTC,
-        'DTSTART:' + startUTC,
-        'DTEND:'   + endUTC,
-        'SUMMARY:' + summary,
-        'LOCATION:' + location,
-        'DESCRIPTION:' + desc,
-        'STATUS:CONFIRMED',
-        'SEQUENCE:0',
-        'END:VEVENT',
-        'END:VCALENDAR'
-      ];
-      var icsContent = icsLines.join('\r\n');
-
-      // Google Calendar URL fallback (works when file download is blocked)
       var gcUrl = 'https://calendar.google.com/calendar/render?action=TEMPLATE'
         + '&text=' + encodeURIComponent(summary)
         + '&dates=' + startUTC + '/' + endUTC
-        + '&details=' + encodeURIComponent('Nikkah Ceremony of Afridi Muhammed Zahid & Sahala Mumthaz')
+        + '&details=' + encodeURIComponent(details)
         + '&location=' + encodeURIComponent(location);
 
-      // data: URI works on iOS Safari where blob: URL downloads are blocked
-      var dataUri = 'data:text/calendar;charset=utf-8,' + encodeURIComponent(icsContent);
-      var link = document.createElement('a');
-      link.href = dataUri;
-      link.download = 'afridi-sahala-nikkah.ics';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-
-      // After a short delay show a Google Calendar fallback toast
-      setTimeout(function(){
-        var existing = document.getElementById('_calToast');
-        if(existing) return;
-        var toast = document.createElement('div');
-        toast.id = '_calToast';
-        toast.style.cssText = [
-          'position:fixed','bottom:80px','left:50%','transform:translateX(-50%)',
-          'background:rgba(4,26,19,0.94)','border:1px solid rgba(196,164,104,0.45)',
-          'color:#fdfaf5','font-family:Cinzel,serif','font-size:0.63rem',
-          'letter-spacing:0.1em','padding:12px 18px','border-radius:8px',
-          'z-index:9999','display:flex','align-items:center','gap:10px',
-          'box-shadow:0 8px 24px rgba(0,0,0,0.55)','backdrop-filter:blur(8px)',
-          '-webkit-backdrop-filter:blur(8px)','white-space:nowrap','cursor:pointer'
-        ].join(';');
-        toast.innerHTML = 'File not saved? &nbsp;';
-        var gcLink = document.createElement('a');
-        gcLink.href = gcUrl;
-        gcLink.target = '_blank';
-        gcLink.rel = 'noopener';
-        gcLink.textContent = 'Add via Google Calendar \u2192';
-        gcLink.style.cssText = 'color:#cfb176;text-decoration:underline;';
-        toast.appendChild(gcLink);
-        document.body.appendChild(toast);
-        setTimeout(function(){ if(toast.parentNode) toast.parentNode.removeChild(toast); }, 6000);
-      }, 900);
+      window.open(gcUrl, '_blank', 'noopener,noreferrer');
     });
   }
 
