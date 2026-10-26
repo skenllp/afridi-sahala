@@ -1245,4 +1245,20 @@
     .card{ max-width:440px; }
   }
 
+  @page {
+    size: A4;
+    margin: 0;
+  }
+
+  html, body {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  @media print {
+    html, body {
+      background: #0b2a1c !important; /* your dark green */
+    }
+  }
+
 
