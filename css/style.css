@@ -486,34 +486,34 @@
     .scroll-down-icon{ animation:none; }
   }
 
-  /* Phone / mobile view: place scroll button on the right side where marked */
+  /* Phone / mobile view: properly centered at bottom of invitation section */
   @media (max-width: 820px){
     #invitation{
-      padding-bottom: 6vh;
+      padding-bottom: 90px;
     }
     .scroll-down-btn{
-      left: auto;
-      right: 10px;
-      top: 58%;
-      bottom: auto;
-      transform: translateY(-50%);
-      padding: 6px;
+      left: 50%;
+      right: auto;
+      top: auto;
+      bottom: 16px;
+      transform: translateX(-50%);
+      padding: 6px 12px;
       gap: 5px;
     }
     .scroll-down-btn:hover{
-      transform: translateY(-50%) translateY(3px);
+      transform: translateX(-50%) translateY(3px);
     }
     .scroll-down-btn:active{
-      transform: translateY(-50%) scale(0.95);
+      transform: translateX(-50%) scale(0.95);
     }
     .scroll-down-text{
-      font-size: 0.5rem;
-      letter-spacing: 0.16em;
+      font-size: 0.52rem;
+      letter-spacing: 0.2em;
       white-space: nowrap;
     }
     .scroll-down-icon{
-      width: 36px;
-      height: 36px;
+      width: 32px;
+      height: 32px;
       border: 1px solid rgba(239,220,174,0.6);
       background: rgba(4,26,19,0.6);
       backdrop-filter: blur(5px);
