@@ -353,7 +353,7 @@
           <span class="name" style="font-size:clamp(1.9rem,7vw,2.6rem);">Sahala Mumthaz</span>
         </div>
 
-        <button type="button" class="btn btn-gold" id="openPdfModalBtn" style="margin-top:20px;">
+        <button type="button" class="btn btn-gold" id="downloadPdfBtn" style="margin-top:20px;">
           <svg viewBox="0 0 24 24" fill="none" width="15" height="15"><path d="M12 3v12m0 0l-4-4m4 4l4-4M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
           Download PDF
         </button>
@@ -361,76 +361,6 @@
     </section>
 
   </main>
-
-  <!-- PDF DOWNLOAD MODAL -->
-  <div class="pdf-modal-backdrop" id="pdfModal" aria-hidden="true" role="dialog" aria-labelledby="pdfModalTitle">
-    <div class="pdf-modal-card">
-      <button class="pdf-modal-close" id="closePdfModalBtn" aria-label="Close modal">
-        <svg viewBox="0 0 24 24" fill="none" width="16" height="16"><path d="M6 18L18 6M6 6l12 12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
-      </button>
-
-      <span class="eyebrow" id="pdfModalTitle" style="margin-bottom:2px;">Wedding Invitation Card</span>
-
-      <!-- EXACT INVITATION CARD PREVIEW & EXPORT ELEMENT -->
-      <div id="invitationCardToExport" class="pdf-invitation-card">
-        <div class="pdf-card-inner">
-          <p class="pdf-bismi-ar">بِسْمِ اللهِ الرَّحْمٰنِ الرَّحِيْمِ</p>
-          <p class="pdf-bismi-en">In the name of Allah, the Most Beneficent and the Most Merciful</p>
-          
-          <div class="pdf-divider"><span class="line"></span><span class="diamond"></span><span class="line"></span></div>
-
-          <span class="pdf-eyebrow">The Nikkah Ceremony of</span>
-          <h2 class="pdf-name">Afridi Muhammed Zahid</h2>
-          <p class="pdf-amp">&amp;</p>
-          <h2 class="pdf-name">Sahala Mumthaz</h2>
-
-          <div class="pdf-divider"><span class="line"></span><span class="diamond"></span><span class="line"></span></div>
-
-          <p class="pdf-tagline">A Celebration of Love, Family, and New Beginnings</p>
-
-          <div class="pdf-family-box">
-            <div class="pdf-family-col">
-              <p class="pdf-family-role">Groom</p>
-              <p class="pdf-parent-names">Mr. Abdul Shukkur &amp; Mrs. Khadeeja MK</p>
-              <p class="pdf-family-sub">S/O Late Abdurehiman<br>Rtd. Forest Range Officer (Rose, Kuthuparamba)</p>
-              <p class="pdf-family-sub">D/O Mr. A.P Khalid Haji (KK House, Kadachira)</p>
-              <p class="pdf-address">&ldquo;KEF&rdquo; Near Siddique Juma Masjid, Poduvachery, Kannur</p>
-            </div>
-
-            <div class="pdf-family-col" style="margin-top:10px;">
-              <p class="pdf-family-role">Bride</p>
-              <p class="pdf-parent-names">Mr. Rafeeque Puthiya veetil &amp; Mrs. Thahira Rafeeque</p>
-              <p class="pdf-family-sub">S/O Late Mr. Mammad Haji</p>
-              <p class="pdf-family-sub">D/O Late Mr. Kunjimaayan Haji</p>
-              <p class="pdf-address">Sal Sabeel, Paral, Kuthuparamba</p>
-            </div>
-          </div>
-
-          <div class="pdf-date-box">
-            <p class="pdf-date-main">Sunday, 6 December 2026</p>
-            <p class="pdf-time-main">11:00 AM · Nikkah Ceremony</p>
-          </div>
-
-          <p class="pdf-quran-ar" lang="ar" dir="rtl">وَمِنْ آيَاتِهِ أَنْ خَلَقَ لَكُم مِّنْ أَنفُسِكُمْ أَزْوَاجًا لِّتَسْكُنُوا إِلَيْهَا وَجَعَلَ بَيْنَكُم مَّوَدَّةً وَرَحْمَةً</p>
-          <p class="pdf-quran-en">&ldquo;And He placed between you love and mercy&rdquo; · Surah Ar-Rum 30:21</p>
-
-          <p class="pdf-dua-ar" lang="ar" dir="rtl">اللَّهُمَّ أَلِّفْ بَيْنَ قُلُوبِنَا وَأَصْلِحْ ذَاتَ بَيْنِنَا</p>
-          <p class="pdf-closing-msg">With love, from our families to yours</p>
-        </div>
-      </div>
-
-      <div class="pdf-modal-actions">
-        <button type="button" class="btn btn-gold" id="directPdfLink">
-          <svg viewBox="0 0 24 24" fill="none" width="15" height="15"><path d="M12 3v12m0 0l-4-4m4 4l4-4M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          Download PDF File
-        </button>
-        <button type="button" class="btn" id="printInviteBtn" style="border:1px solid var(--gold-line); color:var(--gold-light); background:rgba(4,26,19,0.5);">
-          <svg viewBox="0 0 24 24" fill="none" width="15" height="15"><path d="M6 9V2h12v7M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2M6 14h12v8H6v-8Z" stroke="currentColor" stroke-width="1.5"/></svg>
-          Print / Save as PDF
-        </button>
-      </div>
-    </div>
-  </div>
 
   <!-- FOOTER -->
   <footer>

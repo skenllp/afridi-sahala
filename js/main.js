@@ -428,26 +428,79 @@
   var addToCalendarBtn = document.getElementById('addToCalendarBtn');
   if(addToCalendarBtn){
     addToCalendarBtn.addEventListener('click', function(){
-      var start = '20261206T110000';
-      var end = '20261206T140000';
-      var ics = [
-        'BEGIN:VCALENDAR','VERSION:2.0','BEGIN:VEVENT',
-        'SUMMARY:Afridi & Sahala — Nikkah Ceremony',
-        'DTSTART;TZID=Asia/Kolkata:' + start,
-        'DTEND;TZID=Asia/Kolkata:' + end,
-        'LOCATION:https://share.google/1opghPwIJbe56JB4E',
-        'DESCRIPTION:Nikkah Ceremony of Afridi Muhammed Zahid & Sahala Mumthaz',
-        'END:VEVENT','END:VCALENDAR'
-      ].join('\r\n');
-      var blob = new Blob([ics], { type: 'text/calendar' });
+      // 6 Dec 2026 11:00 AM IST (UTC+5:30) = 05:30 UTC
+      var startUTC = '20261206T053000Z';
+      var endUTC   = '20261206T083000Z';
+      var summary  = 'Afridi & Sahala \u2014 Nikkah Ceremony';
+      var location = 'Vajra Convention Centre, Kannur';
+      var desc     = 'Nikkah Ceremony of Afridi Muhammed Zahid & Sahala Mumthaz\\nSunday\\, 6 December 2026 \xb7 11:00 AM IST';
+
+      var icsLines = [
+        'BEGIN:VCALENDAR',
+        'VERSION:2.0',
+        'PRODID:-//Afridi Sahala Wedding//EN',
+        'CALSCALE:GREGORIAN',
+        'METHOD:PUBLISH',
+        'BEGIN:VEVENT',
+        'UID:afridi-sahala-nikkah-20261206@wedding',
+        'DTSTAMP:' + startUTC,
+        'DTSTART:' + startUTC,
+        'DTEND:'   + endUTC,
+        'SUMMARY:' + summary,
+        'LOCATION:' + location,
+        'DESCRIPTION:' + desc,
+        'STATUS:CONFIRMED',
+        'SEQUENCE:0',
+        'END:VEVENT',
+        'END:VCALENDAR'
+      ];
+      var icsContent = icsLines.join('\r\n');
+
+      // Google Calendar URL fallback (works when file download is blocked)
+      var gcUrl = 'https://calendar.google.com/calendar/render?action=TEMPLATE'
+        + '&text=' + encodeURIComponent(summary)
+        + '&dates=' + startUTC + '/' + endUTC
+        + '&details=' + encodeURIComponent('Nikkah Ceremony of Afridi Muhammed Zahid & Sahala Mumthaz')
+        + '&location=' + encodeURIComponent(location);
+
+      // data: URI works on iOS Safari where blob: URL downloads are blocked
+      var dataUri = 'data:text/calendar;charset=utf-8,' + encodeURIComponent(icsContent);
       var link = document.createElement('a');
-      link.href = URL.createObjectURL(blob);
+      link.href = dataUri;
       link.download = 'afridi-sahala-nikkah.ics';
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
+
+      // After a short delay show a Google Calendar fallback toast
+      setTimeout(function(){
+        var existing = document.getElementById('_calToast');
+        if(existing) return;
+        var toast = document.createElement('div');
+        toast.id = '_calToast';
+        toast.style.cssText = [
+          'position:fixed','bottom:80px','left:50%','transform:translateX(-50%)',
+          'background:rgba(4,26,19,0.94)','border:1px solid rgba(196,164,104,0.45)',
+          'color:#fdfaf5','font-family:Cinzel,serif','font-size:0.63rem',
+          'letter-spacing:0.1em','padding:12px 18px','border-radius:8px',
+          'z-index:9999','display:flex','align-items:center','gap:10px',
+          'box-shadow:0 8px 24px rgba(0,0,0,0.55)','backdrop-filter:blur(8px)',
+          '-webkit-backdrop-filter:blur(8px)','white-space:nowrap','cursor:pointer'
+        ].join(';');
+        toast.innerHTML = 'File not saved? &nbsp;';
+        var gcLink = document.createElement('a');
+        gcLink.href = gcUrl;
+        gcLink.target = '_blank';
+        gcLink.rel = 'noopener';
+        gcLink.textContent = 'Add via Google Calendar \u2192';
+        gcLink.style.cssText = 'color:#cfb176;text-decoration:underline;';
+        toast.appendChild(gcLink);
+        document.body.appendChild(toast);
+        setTimeout(function(){ if(toast.parentNode) toast.parentNode.removeChild(toast); }, 6000);
+      }, 900);
     });
   }
+
 
   // ================= MUSIC TOGGLE =================
   var musicBtn = document.getElementById('musicToggle');
@@ -516,39 +569,13 @@
     });
   }
 
-  // ================= PDF DOWNLOAD MODAL =================
-  var openPdfModalBtn = document.getElementById('openPdfModalBtn');
-  var closePdfModalBtn = document.getElementById('closePdfModalBtn');
-  var pdfModal = document.getElementById('pdfModal');
-  var printInviteBtn = document.getElementById('printInviteBtn');
-  var directPdfLink = document.getElementById('directPdfLink');
-
-  function openPdfModal(){
-    if(pdfModal){
-      pdfModal.classList.add('open');
-      pdfModal.setAttribute('aria-hidden', 'false');
-    }
-  }
-
-  function closePdfModal(){
-    if(pdfModal){
-      pdfModal.classList.remove('open');
-      pdfModal.setAttribute('aria-hidden', 'true');
-    }
-  }
-
-  if(openPdfModalBtn){ openPdfModalBtn.addEventListener('click', openPdfModal); }
-  if(closePdfModalBtn){ closePdfModalBtn.addEventListener('click', closePdfModal); }
-  if(pdfModal){
-    pdfModal.addEventListener('click', function(e){
-      if(e.target === pdfModal){ closePdfModal(); }
+  // ================= DIRECT PDF DOWNLOAD =================
+  var downloadPdfBtn = document.getElementById('downloadPdfBtn') || document.getElementById('openPdfModalBtn');
+  if(downloadPdfBtn){
+    downloadPdfBtn.addEventListener('click', function(){
+      downloadPdfAction();
     });
   }
-  document.addEventListener('keydown', function(e){
-    if(e.key === 'Escape' && pdfModal && pdfModal.classList.contains('open')){
-      closePdfModal();
-    }
-  });
 
   function openInvitationPrintWindow(){
     var printWin = window.open('', '_blank', 'width=800,height=1000,scrollbars=yes');
@@ -671,16 +698,162 @@
     printWin.document.close();
   }
 
-  function downloadPdfAction(){
-    openInvitationPrintWindow();
+  // Scoped styles for the offscreen card used to render the PDF directly in-page.
+  var PDF_RENDER_CSS = [
+    '#pdfRenderRoot{width:210mm;height:297mm;background:linear-gradient(145deg,#092c20,#041912);font-family:"Cormorant Garamond",Georgia,serif;display:flex;align-items:center;justify-content:center;padding:12mm;}',
+    '#pdfRenderRoot *{margin:0;padding:0;box-sizing:border-box;}',
+    '#pdfRenderRoot .inv-card{width:100%;height:100%;background:linear-gradient(145deg,#092c20,#041912);border:2.5pt solid #cfb176;border-radius:8pt;display:flex;align-items:center;justify-content:center;color:#fdfaf5;text-align:center;}',
+    '#pdfRenderRoot .inv-inner{width:100%;height:100%;border:1pt solid rgba(207,177,118,0.5);border-radius:6pt;padding:10mm 12mm;display:flex;flex-direction:column;align-items:center;justify-content:space-between;}',
+    '#pdfRenderRoot .bismi-ar{font-family:"Amiri",serif;font-size:22pt;color:#f7ecda;direction:rtl;margin-bottom:2pt;}',
+    '#pdfRenderRoot .bismi-en{font-family:"Cinzel",serif;font-size:6pt;letter-spacing:1.5pt;text-transform:uppercase;color:#cfb176;margin-bottom:6pt;}',
+    '#pdfRenderRoot .divider{display:flex;align-items:center;justify-content:center;gap:6pt;width:120pt;margin:4pt auto;}',
+    '#pdfRenderRoot .divider .dl{flex:1;height:0.5pt;background:linear-gradient(90deg,transparent,#cfb176 50%,transparent);}',
+    '#pdfRenderRoot .divider .dd{width:4pt;height:4pt;background:#cfb176;transform:rotate(45deg);flex-shrink:0;}',
+    '#pdfRenderRoot .eyebrow{font-family:"Cinzel",serif;font-size:6.5pt;letter-spacing:2pt;text-transform:uppercase;color:#d8c6a3;display:block;margin:3pt 0 2pt;}',
+    '#pdfRenderRoot .cname{font-family:"Cormorant Garamond",serif;font-size:24pt;font-weight:600;color:#efdcae;line-height:1.1;margin:1pt 0;}',
+    '#pdfRenderRoot .camp{font-family:"Cormorant Garamond",serif;font-style:italic;font-size:16pt;color:#cfb176;margin:0;display:block;}',
+    '#pdfRenderRoot .tagline{font-size:9pt;font-style:italic;color:#fdfaf5;margin:3pt 0;}',
+    '#pdfRenderRoot .family-box{width:100%;display:flex;flex-direction:column;gap:0;font-size:8pt;line-height:1.6;margin:4pt 0;}',
+    '#pdfRenderRoot .family-role{font-family:"Cinzel",serif;font-size:5.5pt;letter-spacing:1.5pt;text-transform:uppercase;color:#cfb176;margin:0 0 1.5pt;}',
+    '#pdfRenderRoot .parent-names{font-family:"Cormorant Garamond",serif;font-size:10.5pt;color:#fdfaf5;font-weight:600;margin:0 0 1pt;}',
+    '#pdfRenderRoot .family-sub{font-size:7.5pt;color:#cfc5b4;margin:0.5pt 0;}',
+    '#pdfRenderRoot .address{font-size:7pt;font-style:italic;color:#b8a892;margin:1.5pt 0 0;}',
+    '#pdfRenderRoot .sep{height:0.5pt;background:rgba(207,177,118,0.3);margin:6pt 0;width:100%;}',
+    '#pdfRenderRoot .date-box{background:rgba(207,177,118,0.12);border:0.75pt solid rgba(207,177,118,0.45);border-radius:5pt;padding:6pt 12pt;width:100%;}',
+    '#pdfRenderRoot .date-main{font-family:"Cinzel",serif;font-size:11pt;letter-spacing:1.5pt;color:#efdcae;font-weight:600;margin:0 0 2pt;text-transform:uppercase;}',
+    '#pdfRenderRoot .time-main{font-family:"Cinzel",serif;font-size:7pt;letter-spacing:1pt;color:#cfb176;margin:0;}',
+    '#pdfRenderRoot .quran-ar{font-family:"Amiri",serif;font-size:10pt;color:#efdcae;direction:rtl;line-height:1.9;margin:3pt 0 1pt;}',
+    '#pdfRenderRoot .quran-en{font-family:"EB Garamond",serif;font-style:italic;font-size:7.5pt;color:#cfc5b4;margin:0 0 4pt;}',
+    '#pdfRenderRoot .dua-ar{font-family:"Amiri",serif;font-size:11pt;color:#efdcae;direction:rtl;line-height:1.7;margin:2pt 0 1pt;}',
+    '#pdfRenderRoot .closing{font-family:"Cinzel",serif;font-size:5.5pt;letter-spacing:1.5pt;text-transform:uppercase;color:#cfb176;margin:2pt 0 0;}'
+  ].join('');
+
+  function getInvitationInnerMarkup(){
+    return [
+      '<div>',
+      '<p class="bismi-ar">&#x628;&#x650;&#x633;&#x652;&#x645;&#x650; &#x627;&#x644;&#x644;&#x647;&#x650; &#x627;&#x644;&#x631;&#x64E;&#x651;&#x62D;&#x652;&#x645;&#x670;&#x646;&#x650; &#x627;&#x644;&#x631;&#x64E;&#x651;&#x62D;&#x650;&#x64A;&#x652;&#x645;&#x650;</p>',
+      '<p class="bismi-en">In the name of Allah, the Most Beneficent and the Most Merciful</p>',
+      '</div>',
+
+      '<div class="divider"><span class="dl"></span><span class="dd"></span><span class="dl"></span></div>',
+
+      '<div>',
+      '<span class="eyebrow">The Nikkah Ceremony of</span>',
+      '<p class="cname">Afridi Muhammed Zahid</p>',
+      '<span class="camp">&amp;</span>',
+      '<p class="cname">Sahala Mumthaz</p>',
+      '</div>',
+
+      '<div class="divider"><span class="dl"></span><span class="dd"></span><span class="dl"></span></div>',
+
+      '<p class="tagline">A Celebration of Love, Family, and New Beginnings</p>',
+
+      '<div class="family-box">',
+      '<div>',
+      '<p class="family-role">Groom</p>',
+      '<p class="parent-names">Mr. Abdul Shukkur &amp; Khadeeja MK</p>',
+      '<p class="family-sub">S/O Late Abdurehiman &nbsp;|&nbsp; Rtd. Forest Range Officer (Rose, Kuthuparamba)</p>',
+      '<p class="family-sub">D/O Mr. A.P Khalid Haji (KK House, Kadachira)</p>',
+      '<p class="address">&ldquo;KEF&rdquo; Near Siddique Juma Masjid, Poduvachery, Kannur</p>',
+      '</div>',
+      '<div class="sep"></div>',
+      '<div>',
+      '<p class="family-role">Bride</p>',
+      '<p class="parent-names">Mr. Rafeeque Puthiya veetil &amp; Mrs. Thahira Rafeeque</p>',
+      '<p class="family-sub">S/O Late Mr. Mammad Haji</p>',
+      '<p class="family-sub">D/O Late Mr. Kunjimaayan Haji</p>',
+      '<p class="address">Sal Sabeel, Paral, Kuthuparamba</p>',
+      '</div>',
+      '</div>',
+
+      '<div class="date-box">',
+      '<p class="date-main">Sunday, 6 December 2026</p>',
+      '<p class="time-main">11:00 AM &middot; Nikkah Ceremony</p>',
+      '</div>',
+
+      '<div>',
+      '<p class="quran-ar" dir="rtl">&#x648;&#x64E;&#x645;&#x650;&#x646;&#x652; &#x622;&#x64A;&#x627;&#x62A;&#x650;&#x647;&#x650; &#x623;&#x646;&#x652; &#x62E;&#x644;&#x64E;&#x642;&#x64E; &#x644;&#x64E;&#x643;&#x64F;&#x645; &#x645;&#x650;&#x651;&#x646;&#x652; &#x623;&#x646;&#x64F;&#x641;&#x64F;&#x633;&#x650;&#x643;&#x64F;&#x645;&#x652; &#x623;&#x632;&#x648;&#x627;&#x62C;&#x64B;&#x627; &#x644;&#x650;&#x651;&#x62A;&#x64E;&#x633;&#x652;&#x643;&#x64F;&#x646;&#x64F;&#x648;&#x627; &#x625;&#x650;&#x644;&#x64E;&#x64A;&#x652;&#x647;&#x627; &#x648;&#x64E;&#x62C;&#x64E;&#x639;&#x64E;&#x644;&#x64E; &#x628;&#x64E;&#x64A;&#x652;&#x646;&#x64E;&#x643;&#x64F;&#x645; &#x645;&#x64E;&#x651;&#x648;&#x64E;&#x62F;&#x64E;&#x651;&#x629;&#x64B; &#x648;&#x64E;&#x631;&#x64E;&#x62D;&#x652;&#x645;&#x64E;&#x629;&#x64B;</p>',
+      '<p class="quran-en">&ldquo;And He placed between you love and mercy&rdquo; &middot; Surah Ar-Rum 30:21</p>',
+      '</div>',
+
+      '<div>',
+      '<p class="dua-ar" dir="rtl">&#x627;&#x644;&#x644;&#x64E;&#x651;&#x647;&#x64F;&#x645;&#x64E;&#x651; &#x623;&#x64E;&#x644;&#x650;&#x651;&#x641;&#x652; &#x628;&#x64E;&#x64A;&#x652;&#x646;&#x64E; &#x642;&#x64F;&#x644;&#x64F;&#x648;&#x628;&#x650;&#x646;&#x64E;&#x627; &#x648;&#x64E;&#x623;&#x64E;&#x635;&#x652;&#x644;&#x650;&#x62D;&#x652; &#x630;&#x64E;&#x627;&#x62A;&#x64E; &#x628;&#x64E;&#x64A;&#x652;&#x646;&#x650;&#x646;&#x64E;&#x627;</p>',
+      '<p class="closing">With love, from our families to yours</p>',
+      '</div>'
+    ].join('');
   }
 
-  if(directPdfLink){ directPdfLink.addEventListener('click', downloadPdfAction); }
+  function buildPdfRenderRoot(){
+    var style = document.createElement('style');
+    style.id = 'pdfRenderStyle';
+    style.textContent = PDF_RENDER_CSS;
 
-  if(printInviteBtn){
-    printInviteBtn.addEventListener('click', function(){
-      window.print();
-    });
+    var wrap = document.createElement('div');
+    wrap.style.cssText = 'position:fixed;left:-10000px;top:0;';
+
+    var root = document.createElement('div');
+    root.id = 'pdfRenderRoot';
+    root.innerHTML = '<div class="inv-card"><div class="inv-inner">' + getInvitationInnerMarkup() + '</div></div>';
+
+    wrap.appendChild(root);
+    document.head.appendChild(style);
+    document.body.appendChild(wrap);
+    return { root: root, wrap: wrap };
+  }
+
+  function downloadPdfAction(){
+    if(typeof html2pdf === 'undefined'){
+      openInvitationPrintWindow();
+      return;
+    }
+
+    var rendered = buildPdfRenderRoot();
+    var root = rendered.root;
+    var wrap = rendered.wrap;
+    if(downloadPdfBtn){
+      downloadPdfBtn.disabled = true;
+      downloadPdfBtn.style.opacity = '0.7';
+    }
+
+    var cleaned = false;
+    var cleanup = function(){
+      if(cleaned) return;
+      cleaned = true;
+      var style = document.getElementById('pdfRenderStyle');
+      if(style && style.parentNode) style.parentNode.removeChild(style);
+      if(wrap && wrap.parentNode) wrap.parentNode.removeChild(wrap);
+      if(downloadPdfBtn){
+        downloadPdfBtn.disabled = false;
+        downloadPdfBtn.style.opacity = '';
+      }
+    };
+
+    var run = function(){
+      html2pdf().set({
+        margin: 0,
+        filename: 'afridi-sahala-wedding-invitation.pdf',
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: {
+          scale: 2,
+          useCORS: true,
+          backgroundColor: '#041912',
+          scrollX: 0,
+          scrollY: 0,
+          logging: false
+        },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait', compress: true },
+        pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
+      }).from(root).save().then(cleanup).catch(function(){
+        cleanup();
+        openInvitationPrintWindow();
+      });
+    };
+
+    if(document.fonts && document.fonts.ready){
+      document.fonts.ready.then(run);
+    } else {
+      setTimeout(run, 300);
+    }
   }
 
 })();
