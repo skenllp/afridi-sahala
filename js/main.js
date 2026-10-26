@@ -483,6 +483,28 @@
     }
   });
 
+  // Stop music and video when tab/browser is closed, hidden, or navigated away
+  function stopAllMedia(){
+    if(audio && !audio.paused){
+      audio.pause();
+    }
+    if(video && !video.paused){
+      video.pause();
+    }
+  }
+
+  // When tab becomes hidden (switch tab, minimize window, lock screen)
+  document.addEventListener('visibilitychange', function(){
+    if(document.hidden){
+      stopAllMedia();
+    }
+  });
+
+  // When navigating away, closing tab or closing browser window
+  window.addEventListener('pagehide', stopAllMedia);
+  window.addEventListener('beforeunload', stopAllMedia);
+
+
   // ================= SCROLL DOWN BUTTON =================
   var scrollDownBtn = document.getElementById('scrollDownBtn');
   if(scrollDownBtn){
