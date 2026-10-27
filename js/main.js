@@ -25,118 +25,12 @@
     }, 1650);
   }
 
-  // ---- Background video pre-download ----
-  // Fetch the video as a Blob so it is fully in memory before playback.
-  // This eliminates streaming/buffering lag when the user taps "Enter".
+  // ---- Video: native browser streaming (no blob pre-fetch) ----
+  // The old approach fetched the entire video as a Blob before allowing tap,
+  // causing a long wait on slow/mobile connections. Native streaming starts
+  // playback as soon as enough data is buffered — far faster in practice.
   video.loop = false;
   var videoStarted = false;
-  var videoBlobReady = false;   // true once blob URL is assigned
-  var tapPending    = false;    // true if user tapped before blob was ready
-
-  // SVG ring progress injected into the tap button
-  var TAP_BTN_LABEL = tapBtn ? tapBtn.textContent : 'Tap to Enter';
-  var RING_SIZE = 36; // px – diameter of the progress ring drawn behind the button
-  function setTapProgress(pct) {
-    if (!tapBtn) return;
-    var ring = document.getElementById('_vidRing');
-    if (!ring) {
-      // Build a tiny circular progress overlay the first time
-      ring = document.createElement('span');
-      ring.id = '_vidRing';
-      ring.setAttribute('aria-hidden', 'true');
-      ring.style.cssText = [
-        'position:absolute','inset:0','display:flex',
-        'align-items:center','justify-content:center',
-        'pointer-events:none','border-radius:inherit'
-      ].join(';');
-      var r = (RING_SIZE / 2) - 3;
-      var circ = 2 * Math.PI * r;
-      ring.innerHTML = '<svg width="' + RING_SIZE + '" height="' + RING_SIZE + '" viewBox="0 0 ' + RING_SIZE + ' ' + RING_SIZE + '" style="position:absolute;inset:0;margin:auto;overflow:visible;">' +
-        '<circle cx="' + (RING_SIZE/2) + '" cy="' + (RING_SIZE/2) + '" r="' + r + '" fill="none" stroke="rgba(207,177,118,0.25)" stroke-width="2"/>' +
-        '<circle id="_vidRingArc" cx="' + (RING_SIZE/2) + '" cy="' + (RING_SIZE/2) + '" r="' + r + '" fill="none" stroke="#cfb176" stroke-width="2.5" stroke-linecap="round"' +
-        ' stroke-dasharray="' + circ + '" stroke-dashoffset="' + circ + '" transform="rotate(-90 ' + (RING_SIZE/2) + ' ' + (RING_SIZE/2) + ')" style="transition:stroke-dashoffset .3s ease"/>' +
-        '</svg>';
-      // Ensure the button is a positioning context
-      tapBtn.style.position = 'relative';
-      tapBtn.appendChild(ring);
-    }
-    var arc = document.getElementById('_vidRingArc');
-    if (arc) {
-      var r2 = (RING_SIZE / 2) - 3;
-      var circ2 = 2 * Math.PI * r2;
-      arc.style.strokeDashoffset = circ2 * (1 - pct / 100);
-    }
-    if (pct >= 100) {
-      // Remove ring and restore label once download is done
-      setTimeout(function() {
-        if (ring && ring.parentNode) ring.parentNode.removeChild(ring);
-        if (tapBtn) tapBtn.textContent = TAP_BTN_LABEL;
-      }, 350);
-    }
-  }
-
-  function startVideoFetch() {
-    var videoSrc = 'assets/walk5.mp4';
-    if (!window.fetch || !window.URL || !window.URL.createObjectURL) {
-      // Browser doesn't support fetch/Blob – mark ready and fall through to native streaming
-      videoBlobReady = true;
-      if (tapPending) { tapPending = false; playOpeningVideo(); }
-      return;
-    }
-
-    fetch(videoSrc)
-      .then(function(res) {
-        if (!res.ok) throw new Error('Network response not ok');
-        var contentLength = res.headers.get('Content-Length');
-        var total = contentLength ? parseInt(contentLength, 10) : 0;
-        var loaded = 0;
-        var reader = res.body ? res.body.getReader() : null;
-
-        if (!reader) {
-          // No streaming reader – fall back to blob() directly
-          return res.blob();
-        }
-
-        // Stream the response and track progress
-        return new Promise(function(resolve, reject) {
-          var chunks = [];
-          function pump() {
-            reader.read().then(function(result) {
-              if (result.done) {
-                resolve(new Blob(chunks, { type: 'video/mp4' }));
-                return;
-              }
-              chunks.push(result.value);
-              loaded += result.value.byteLength;
-              if (total > 0) {
-                setTapProgress(Math.min(99, Math.round(loaded / total * 100)));
-              }
-              pump();
-            }).catch(reject);
-          }
-          pump();
-        });
-      })
-      .then(function(blob) {
-        var blobUrl = URL.createObjectURL(blob);
-        // Replace the video source with the fully-downloaded blob URL
-        video.src = blobUrl;
-        video.load();
-        videoBlobReady = true;
-        setTapProgress(100);
-        if (tapPending) { tapPending = false; playOpeningVideo(); }
-      })
-      .catch(function(err) {
-        console.warn('Video pre-fetch failed, falling back to streaming:', err);
-        // Leave the original src in place; native streaming will be used
-        videoBlobReady = true;
-        setTapProgress(100);
-        if (tapPending) { tapPending = false; playOpeningVideo(); }
-      });
-  }
-
-  // Kick off the background download immediately on page load
-  startVideoFetch();
 
   function playOpeningVideo(){
     if(videoStarted) return;
@@ -144,7 +38,6 @@
     if(tapBtn){ tapBtn.disabled = true; }
     opening.classList.add('playing');
 
-    // Start the background music when video starts
     var bgAudio = document.getElementById('bgAudio');
     if(bgAudio){
       bgAudio.play().catch(function(err){
@@ -154,8 +47,10 @@
 
     var revealAfterVideo = function(){ revealSite(); };
     video.addEventListener('ended', revealAfterVideo, { once:true });
-    // Fallback in case 'ended' never fires (autoplay block, decode issue, etc.)
-    var fallbackMs = (video.duration && !isNaN(video.duration)) ? Math.round((video.duration + 2.5) * 1000) : 12000;
+    // Fallback: if ended never fires (decode issue, autoplay block, etc.)
+    var fallbackMs = (video.duration && !isNaN(video.duration))
+      ? Math.round((video.duration + 2.5) * 1000)
+      : 12000;
     setTimeout(revealAfterVideo, fallbackMs);
 
     var p = video.play();
@@ -164,22 +59,12 @@
 
   if(tapBtn){
     tapBtn.addEventListener('click', function(){
-      if (!videoBlobReady) {
-        // Still downloading – queue the play for when it's ready
-        tapPending = true;
-        if (tapBtn) {
-          tapBtn.disabled = true;
-          tapBtn.textContent = 'Loading...';
-        }
-      } else {
-        playOpeningVideo();
-      }
+      playOpeningVideo();
     });
   }
 
-  // safety: if video errors, still let user in
+  // If video fails to load at all, still let the user through
   video.addEventListener('error', function(){
-    videoBlobReady = true; // unblock tap
     if(enterPrompt) enterPrompt.classList.add('show');
   });
 
