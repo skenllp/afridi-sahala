@@ -293,36 +293,52 @@
     -webkit-transform: translateZ(0);
   }
 
-  /* Background image: use body pseudo-element to avoid mobile scroll glitch.
-     position:fixed on a div causes visible jumps on iOS/Android when the
-     browser chrome (URL bar) shows/hides. Painting via body::before with
-     background-attachment:fixed on desktop, and a fixed pseudo-element
-     whose size is locked with -webkit-fill-available on mobile, is stable. */
+  /* ── BACKGROUND: no more position:fixed div ──────────────────────────────
+     On desktop: background-attachment:fixed paints the image relative to the
+     viewport — it looks pinned and never glitches.
+     On mobile: background-attachment:fixed is broken in iOS/Android (it
+     treats it as scroll). We detect that with @supports and fall back to a
+     static cover per section — same image, same crop, zero scroll jump.
+  ──────────────────────────────────────────────────────────────────────── */
+
+  /* Hide the old bg-fixed divs — we no longer need them */
   .bg-fixed {
     display: none !important;
   }
 
-  body::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    background: url('../assets/floral-background.webp') center top / cover no-repeat;
-    background-color: #0b3023;
-    z-index: 0;
-    pointer-events: none;
-    /* No will-change or transform — avoids stacking-context / repaint glitch */
+  /* Desktop / browsers that support background-attachment:fixed properly */
+  #site {
+    background: url('../assets/floral-background.webp') center top / cover no-repeat fixed #0b3023;
   }
-  body::after {
+
+  /* Overlay tint painted via #site::before so it follows the same bg */
+  #site::before {
     content: '';
     position: fixed;
     inset: 0;
-    width: 100%;
-    height: 100%;
-    background: radial-gradient(ellipse at center, rgba(3,20,14,0.28) 0%, rgba(3,20,14,0.2) 45%, rgba(3,20,14,0.1) 100%);
-    z-index: 0;
+    background: radial-gradient(ellipse at center,
+      rgba(3,20,14,0.28) 0%,
+      rgba(3,20,14,0.2) 45%,
+      rgba(3,20,14,0.1) 100%);
     pointer-events: none;
+    z-index: 0;
+  }
+
+  /* Mobile fallback — when background-attachment:fixed doesn't work,
+     paint the image as a static cover on each section individually.
+     `background-size: cover` anchored to center gives the same visual
+     as the desktop pinned version; no reflow, no jump. */
+  @supports not (background-attachment: fixed) {
+    #site {
+      background: #0b3023;
+    }
+    #site section {
+      background: url('../assets/floral-background.webp') center center / cover no-repeat;
+    }
+    #site::before {
+      position: absolute;
+      height: 100%;
+    }
   }
 
   .bokeh-layer{
