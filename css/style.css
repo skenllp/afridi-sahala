@@ -15,14 +15,22 @@
   }
 
   *{box-sizing:border-box;}
-  html,body{margin:0;padding:0;}
-  html{scroll-behavior:smooth;}
+  html,body{
+    margin:0;
+    padding:0;
+    width:100%;
+    max-width:100vw;
+    overflow-x:hidden;
+  }
+  html{
+    scroll-behavior:smooth;
+    -webkit-text-size-adjust:100%;
+    text-size-adjust:100%;
+  }
   body{
     background:#0b3023;
     color:var(--ink);
     font-family:'EB Garamond', serif;
-    overflow-x:hidden;
-    width:100%;
   }
   img{max-width:100%;display:block;}
   a{color:inherit;}
@@ -264,6 +272,9 @@
   ============================================================ */
   #site{
     position:relative;
+    width:100%;
+    max-width:100vw;
+    overflow-x:hidden;
     visibility:hidden;
   }
   #site.revealed{visibility:visible;}
@@ -963,7 +974,7 @@
   .field-input, .field-select{
     width:100%;
     font-family:'EB Garamond', serif;
-    font-size:1rem;
+    font-size:16px;
     padding:12px 14px;
     border:1px solid var(--gold-line);
     border-radius:8px;
