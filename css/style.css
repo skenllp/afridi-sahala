@@ -11,7 +11,6 @@
     --gold-line: rgba(196,164,104,0.55);
     --ink:#3E2C22;
     --ink-soft:#6b5647;
-    --vh: 1vh;
   }
 
   *{box-sizing:border-box;}
@@ -68,12 +67,8 @@
   ============================================================ */
   #opening{
     position:fixed;
-    top:0;
-    left:0;
-    right:0;
-    bottom:0;
+    inset:0;
     width:100%;
-    height:100%;
     height:100vh;
     height:100lvh;
     background:#0b0705;
@@ -286,25 +281,24 @@
   }
   #site.revealed{visibility:visible;}
 
-  .bg-fixed{
-    position:fixed;
-    top:0;
-    left:0;
-    right:0;
-    bottom:0;
-    width:100%;
-    height:100%;
-    height:100vh;
-    height:100lvh;
-    background-image:url('../assets/floral-background.webp');
-    background-size:cover;
-    background-position:center top;
-    background-repeat:no-repeat;
-    background-color:#0b3023;
-    z-index:0;
-    transform:translateZ(0);
-    -webkit-transform:translateZ(0);
-    will-change:transform;
+  .bg-fixed,
+  .bokeh-layer,
+  .butterfly-layer {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100vh;
+    height: 100lvh;
+    pointer-events: none;
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
+  }
+
+  .bg-fixed {
+    z-index: 0;
+    background: url('../assets/floral-background.webp') center top / cover no-repeat;
+    background-color: #0b3023;
+    will-change: transform;
   }
   .bg-fixed::after{
     content:'';
@@ -317,20 +311,8 @@
   }
 
   .bokeh-layer{
-    position:fixed;
-    top:0;
-    left:0;
-    right:0;
-    bottom:0;
-    width:100%;
-    height:100%;
-    height:100vh;
-    height:100lvh;
-    z-index:1;
-    pointer-events:none;
-    overflow:hidden;
-    transform:translateZ(0);
-    -webkit-transform:translateZ(0);
+    z-index: 1;
+    overflow: hidden;
   }
   .bokeh{
     position:absolute;
@@ -348,20 +330,8 @@
   }
 
   .butterfly-layer{
-    position:fixed;
-    top:0;
-    left:0;
-    right:0;
-    bottom:0;
-    width:100%;
-    height:100%;
-    height:100vh;
-    height:100lvh;
-    z-index:4;
-    pointer-events:none;
-    overflow:hidden;
-    transform:translateZ(0);
-    -webkit-transform:translateZ(0);
+    z-index: 4;
+    overflow: hidden;
   }
   .butterfly{
     position:absolute;
