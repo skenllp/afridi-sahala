@@ -312,24 +312,8 @@
     inset:0;
     background:radial-gradient(ellipse at center, rgba(3,20,14,0.28) 0%, rgba(3,20,14,0.2) 45%, rgba(3,20,14,0.1) 100%);
   }
-  /* soft blurred copy that fills the sides when the screen is wider than the artwork */
   .bg-fixed.bg-blur{
-    display:none;
-    background-size:cover;
-    background-position:center;
-    transform:scale(1.12) translateZ(0);
-    -webkit-transform:scale(1.12) translateZ(0);
-    filter:blur(26px) brightness(0.8) saturate(1.05);
-  }
-  .bg-fixed.bg-blur::after{ display:none; }
-  /* keep the full artwork (flowers, pillars, foliage) visible, uncropped and undistorted */
-  @media (min-aspect-ratio: 563/1000){
-    .bg-fixed.bg-blur{ display:block; }
-    .bg-fixed:not(.bg-blur){
-      background-size:auto 100%;
-      background-position:center top;
-      background-color:transparent;
-    }
+    display:none !important;
   }
 
   .bokeh-layer{
