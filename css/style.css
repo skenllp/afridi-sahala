@@ -281,7 +281,6 @@
   }
   #site.revealed{visibility:visible;}
 
-  .bg-fixed,
   .bokeh-layer,
   .butterfly-layer {
     position: fixed;
@@ -294,20 +293,36 @@
     -webkit-transform: translateZ(0);
   }
 
+  /* Background image: use body pseudo-element to avoid mobile scroll glitch.
+     position:fixed on a div causes visible jumps on iOS/Android when the
+     browser chrome (URL bar) shows/hides. Painting via body::before with
+     background-attachment:fixed on desktop, and a fixed pseudo-element
+     whose size is locked with -webkit-fill-available on mobile, is stable. */
   .bg-fixed {
-    z-index: 0;
+    display: none !important;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
     background: url('../assets/floral-background.webp') center top / cover no-repeat;
     background-color: #0b3023;
-    will-change: transform;
+    z-index: 0;
+    pointer-events: none;
+    /* No will-change or transform — avoids stacking-context / repaint glitch */
   }
-  .bg-fixed::after{
-    content:'';
-    position:absolute;
-    inset:0;
-    background:radial-gradient(ellipse at center, rgba(3,20,14,0.28) 0%, rgba(3,20,14,0.2) 45%, rgba(3,20,14,0.1) 100%);
-  }
-  .bg-fixed.bg-blur{
-    display:none !important;
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(ellipse at center, rgba(3,20,14,0.28) 0%, rgba(3,20,14,0.2) 45%, rgba(3,20,14,0.1) 100%);
+    z-index: 0;
+    pointer-events: none;
   }
 
   .bokeh-layer{
