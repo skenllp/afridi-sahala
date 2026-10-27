@@ -1,9 +1,21 @@
 (function () {
 
   // -------- viewport height fix (mobile browser chrome) --------
-  function setVH(){ document.documentElement.style.setProperty('--vh', (window.innerHeight*0.01)+'px'); }
+  var lastWidth = window.innerWidth;
+  function setVH(){
+    document.documentElement.style.setProperty('--vh', (window.innerHeight * 0.01) + 'px');
+  }
   setVH();
-  window.addEventListener('resize', setVH);
+  window.addEventListener('resize', function(){
+    // Only update on width/orientation change, avoiding jarring height recalculation while scrolling
+    if (Math.abs(window.innerWidth - lastWidth) > 30) {
+      lastWidth = window.innerWidth;
+      setVH();
+    }
+  });
+  window.addEventListener('orientationchange', function(){
+    setTimeout(setVH, 200);
+  });
 
   var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
